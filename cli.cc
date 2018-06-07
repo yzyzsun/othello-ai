@@ -36,16 +36,16 @@ int main(int argc, char* argv[]) {
   while (pass_times < 2) {
     cout << endl;
     othello.Print();
-    auto t = othello.WhoseTurn();
-    cout << endl << (t == 'B' ? "Black" : "White") << "'s turn "
-         << "(" << (t == 'B' ? "*" : "O") << ")" << endl;
+    auto is_black = othello.WhoseTurn() == OthelloBoard::kBlack;
+    cout << endl << (is_black ? "Black" : "White") << "'s turn "
+         << "(" << (is_black ? "*" : "O") << ")" << endl;
     if (!othello.CanPlay()) {
       cout << "= PASS" << endl;
       othello = othello.Pass();
       ++pass_times;
       continue;
     }
-    if ((t == 'B' && black_is_ai) || (t == 'W' && white_is_ai)) {
+    if ((is_black && black_is_ai) || (!is_black && white_is_ai)) {
       auto node = othello;
       auto best = -kMaxInt;
       for (auto child : node) {
@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
   auto score = othello.AbsoluteScore();
   if (score == 0) {
     cout << "Draw" << endl;
-  } else if ((score > 0) == (othello.WhoseTurn() == 'B')) {
+  } else if ((score > 0) == (othello.WhoseTurn() == OthelloBoard::kBlack)) {
     cout << "Black wins" << endl;
   } else {
     cout << "White wins" << endl;

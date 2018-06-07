@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
   char player; string board;
   cin >> player >> board;
 
-  auto othello = OthelloBoard(board, player);
+  auto othello = OthelloBoard(board, static_cast<OthelloBoard::Player>(player));
   if (!othello.CanPlay()) return 1;
   auto best = -kMaxInt;
   pair<int, int> move;

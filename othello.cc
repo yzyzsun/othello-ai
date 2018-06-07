@@ -4,7 +4,6 @@
 //
 
 #include "othello.h"
-#include <cassert>
 #include <cstring>
 #include <algorithm>
 #include <limits>
@@ -12,6 +11,7 @@
 
 using namespace std;
 
+static constexpr auto kMaxInt = numeric_limits<int>::max();
 static constexpr int kWeights[8][8] = {
   {120, -20,  20,   5,   5,  20, -20, 120},
   {-20, -40,  -5,  -5,  -5,  -5, -40, -20},
@@ -22,31 +22,31 @@ static constexpr int kWeights[8][8] = {
   {-20, -40,  -5,  -5,  -5,  -5, -40, -20},
   {120, -20,  20,   5,   5,  20, -20, 120}
 };
-static constexpr auto kMaxInt = numeric_limits<int>::max();
 
 OthelloBoard::OthelloBoard()
-    : self_('B'), oppo_('W') {
-  memset(board_, '0', sizeof board_);
-  board_[3][4] = board_[4][3] = 'B';
-  board_[3][3] = board_[4][4] = 'W';
+    : self_(kBlack), oppo_(kWhite) {
+  memset(board_, kUnknown, sizeof board_);
+  board_[3][4] = board_[4][3] = kBlack;
+  board_[3][3] = board_[4][4] = kWhite;
 }
 
-OthelloBoard::OthelloBoard(string board, char player) {
+OthelloBoard::OthelloBoard(string board, OthelloBoard::Player player) {
   for (auto i = 0; i < 8; ++i) {
     for (auto j = 0; j < 8; ++j) {
-      board_[i][j] = board[16*i + 2*j];
+      board_[i][j] = static_cast<OthelloBoard::Player>(board[16*i + 2*j]);
     }
   }
   self_ = player;
-  oppo_ = (player == 'B' ? 'W' : 'B');
+  oppo_ = (player == kBlack ? kWhite : kBlack);
 }
 
 OthelloBoard::OthelloBoard(const OthelloBoard& other)
-    : self_(other.self_), oppo_(other.oppo_) {
+    : self_(other.self_), oppo_(other.oppo_),
+      last_row_(other.last_row_), last_col_(other.last_col_) {
   memcpy(board_, other.board_, sizeof board_);
 }
 
-char OthelloBoard::WhoseTurn() const {
+OthelloBoard::Player OthelloBoard::WhoseTurn() const {
   return self_;
 }
 
@@ -72,7 +72,7 @@ bool OthelloBoard::CanFlip(int row, int col,
 
 bool OthelloBoard::CanPlay(int row, int col) const {
   if (!IsInside(row, col)) return false;
-  if (board_[row][col] != '0') return false;
+  if (board_[row][col] != kUnknown) return false;
   for (auto delta_row = -1; delta_row <= 1; ++delta_row) {
     for (auto delta_col = -1; delta_col <= 1; ++delta_col) {
       if (delta_row == 0 && delta_col == 0) continue;
@@ -160,14 +160,16 @@ int OthelloBoard::Negamax(int depth, int alpha, int beta) const {
     return score > 0 ? kMaxInt : -kMaxInt;
   }
   if (depth == 0) return WeightedScore();
-  if (!CanPlay()) return -Pass().Negamax(depth - 1, -beta, -alpha);
   auto best = -kMaxInt;
+  auto can_play = false;
   for (auto child : *this) {
     auto score = -child.Negamax(depth - 1, -beta, -alpha);
     best = max(best, score);
     alpha = max(alpha, score);
     if (alpha >= beta) break;
+    can_play = true;
   }
+  if (!can_play) return -Pass().Negamax(depth - 1, -beta, -alpha);
   return best;
 }
 
@@ -176,11 +178,11 @@ pair<int, int> OthelloBoard::LastMove() const {
 }
 
 char OthelloBoard::Square(int row, int col) const {
-  if (!IsInside(row, col)) return '!';
+  assert(IsInside(row, col));
   switch (board_[row][col]) {
-  case 'B':
+  case kBlack:
     return '*';
-  case 'W':
+  case kWhite:
     return 'O';
   default:
     if (CanPlay(row, col)) return '.';

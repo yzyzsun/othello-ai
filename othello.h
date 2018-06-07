@@ -6,6 +6,7 @@
 #ifndef OTHELLO_H_
 #define OTHELLO_H_
 
+#include <cassert>
 #include <iostream>
 #include <iterator>
 #include <string>
@@ -13,10 +14,12 @@
 
 class OthelloBoard {
  public:
+  enum Player : char { kBlack = 'B', kWhite = 'W', kUnknown = '0' };
+
   OthelloBoard();
-  OthelloBoard(std::string board, char player);
+  OthelloBoard(std::string board, Player player);
   OthelloBoard(const OthelloBoard& other);
-  char WhoseTurn() const;
+  Player WhoseTurn() const;
   bool CanPlay(int row, int col) const;
   bool CanPlay() const;
   bool IsOver() const;
@@ -33,7 +36,6 @@ class OthelloBoard {
     Iterator() : othello_(nullptr) {}
     explicit Iterator(const OthelloBoard* othello)
         : othello_(othello) { ++(*this); }
-    OthelloBoard operator*() const { return othello_->Play(row_, col_); }
     Iterator& operator++() {
       Inc();
       while (othello_ && !othello_->CanPlay(row_, col_)) Inc();
@@ -41,6 +43,10 @@ class OthelloBoard {
     }
     bool operator!=(Iterator other) const {
       return othello_ != other.othello_;
+    }
+    OthelloBoard operator*() const {
+      assert(othello_ != nullptr);
+      return othello_->Play(row_, col_);
     }
    protected:
     void Inc() {
@@ -66,9 +72,9 @@ class OthelloBoard {
   char Square(int row, int col) const;
 
  private:
-  char board_[8][8];
-  char self_;
-  char oppo_;
+  Player board_[8][8];
+  Player self_;
+  Player oppo_;
   int last_row_ = -1;
   int last_col_ = -1;
 };

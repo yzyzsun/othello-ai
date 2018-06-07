@@ -1,4 +1,5 @@
-CXXFLAGS = -g -Ofast -std=c++14
+CXXFLAGS = -Ofast -march=native -flto -std=c++14
+LDFLAGS = -Ofast -march=native -flto
 LDLIBS = -lstdc++
 
 othello: cli.o othello.o
