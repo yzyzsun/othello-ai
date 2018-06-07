@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+
+# Object files
+*.o
+
+# Executables
+*.exe
+othello
