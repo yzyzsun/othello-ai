@@ -29,7 +29,8 @@ class OthelloBoard {
   int WeightedScore() const;
   int Negamax(int depth, int alpha, int beta) const;
   std::pair<int, int> LastMove() const;
-  void Print() const;
+  void PrintBoard(std::ostream& out) const;
+  void PrintResult(std::ostream& out) const;
 
   class Iterator : public std::iterator<std::input_iterator_tag, OthelloBoard> {
    public:

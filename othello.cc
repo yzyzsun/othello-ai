@@ -190,13 +190,39 @@ char OthelloBoard::Square(int row, int col) const {
   }
 }
 
-void OthelloBoard::Print() const {
-  cout << "  0 1 2 3 4 5 6 7" << endl;
+void OthelloBoard::PrintBoard(ostream& out) const {
+  out << "  0 1 2 3 4 5 6 7" << endl;
   for (auto i = 0; i < 8; ++i) {
-    cout << i;
+    out << i;
     for (auto j = 0; j < 8; ++j) {
-      cout << " " << Square(i, j);
+      out << " " << Square(i, j);
     }
-    cout << endl;
+    out << endl;
   }
+}
+
+void OthelloBoard::PrintResult(ostream& out) const {
+  auto black = 0; auto white = 0;
+  for (auto i = 0; i < 8; ++i) {
+    for (auto j = 0; j < 8; ++j) {
+      switch (board_[i][j]) {
+      case kBlack:
+        ++black;
+        break;
+      case kWhite:
+        ++white;
+        break;
+      default:
+        break;
+      }
+    }
+  }
+  if (black > white) {
+    out << "Black wins";
+  } else if (white > black) {
+    out << "White wins";
+  } else {
+    out << "Draw";
+  }
+  out << " (" << black << " : " << white << ")" << endl;
 }
