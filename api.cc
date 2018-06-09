@@ -4,6 +4,7 @@
 //
 
 #include <cstdlib>
+#include <limits>
 #include <string>
 #include "othello.h"
 

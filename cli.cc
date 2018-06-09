@@ -7,7 +7,6 @@
 #include <chrono>
 #include <iostream>
 #include <limits>
-#include <memory>
 #include "othello.h"
 
 using namespace std;
