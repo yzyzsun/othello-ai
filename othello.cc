@@ -36,7 +36,16 @@ OthelloBoard::OthelloBoard(string board, OthelloBoard::Player player) {
     }
   }
   self_ = player;
-  oppo_ = (player == kBlack ? kWhite : kBlack);
+  switch (player) {
+  case kBlack:
+    oppo_ = kWhite;
+    break;
+  case kWhite:
+    oppo_ = kBlack;
+    break;
+  default:
+    oppo_ = kUnknown;
+  }
 }
 
 OthelloBoard::OthelloBoard(const OthelloBoard& other)
@@ -82,6 +91,7 @@ bool OthelloBoard::CanPlay(int row, int col) const {
 }
 
 bool OthelloBoard::CanPlay() const {
+  if (self_ == kUnknown) return false;
   for (auto i = 0; i < 8; ++i) {
     for (auto j = 0; j < 8; ++j) {
       if (CanPlay(i, j)) return true;

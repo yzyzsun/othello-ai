@@ -16,10 +16,15 @@ int main(int argc, char* argv[]) {
   auto depth = 10;
   if (argc == 2) depth = atoi(argv[1]);
 
-  char player; string board;
-  cin >> player >> board;
+  char c; string board;
+  cin >> c >> board;
+  auto player = static_cast<OthelloBoard::Player>(c);
 
-  auto othello = OthelloBoard(board, static_cast<OthelloBoard::Player>(player));
+  auto othello = OthelloBoard(board, player);
+  if (player == OthelloBoard::kUnknown) {
+    othello.PrintBoard(cerr);
+    return 0;
+  }
   if (!othello.CanPlay()) return 1;
   auto best = -kMaxInt;
   pair<int, int> move;
