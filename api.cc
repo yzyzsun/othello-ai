@@ -18,7 +18,10 @@ int main(int argc, char* argv[]) {
 
   char c; string board;
   cin >> c >> board;
-  auto player = static_cast<OthelloBoard::Player>(c);
+
+  auto player = OthelloBoard::kUnknown;
+  if (c == 'B') player = OthelloBoard::kBlack;
+  if (c == 'W') player = OthelloBoard::kWhite;
 
   auto othello = OthelloBoard(board, player);
   if (player == OthelloBoard::kUnknown) {

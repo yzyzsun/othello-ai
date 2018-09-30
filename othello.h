@@ -7,6 +7,7 @@
 #define OTHELLO_H_
 
 #include <cassert>
+#include <cstdint>
 #include <iostream>
 #include <iterator>
 #include <string>
@@ -14,11 +15,10 @@
 
 class OthelloBoard {
  public:
-  enum Player : char { kBlack = 'B', kWhite = 'W', kUnknown = '0' };
+  enum Player { kBlack = 0, kWhite = 1, kUnknown = 2 };
 
   OthelloBoard();
   OthelloBoard(std::string board, Player player);
-  OthelloBoard(const OthelloBoard& other);
   Player WhoseTurn() const;
   bool CanPlay(int row, int col) const;
   bool CanPlay() const;
@@ -34,46 +34,47 @@ class OthelloBoard {
 
   class Iterator : public std::iterator<std::input_iterator_tag, OthelloBoard> {
    public:
-    Iterator() : othello_(nullptr) {}
     explicit Iterator(const OthelloBoard* othello)
-        : othello_(othello) { ++(*this); }
+        : othello_(othello), moves_(othello->moves_) {}
+    Iterator(const OthelloBoard* othello, std::uint64_t moves)
+        : othello_(othello), moves_(moves) {}
     Iterator& operator++() {
-      Inc();
-      while (othello_ && !othello_->CanPlay(row_, col_)) Inc();
+      // Find first set and then minus it
+      moves_ -= moves_ & -moves_;
       return *this;
     }
     bool operator!=(Iterator other) const {
-      return othello_ != other.othello_;
+      return othello_ != other.othello_ || moves_ != other.moves_;
     }
     OthelloBoard operator*() const {
-      assert(othello_ != nullptr);
-      return othello_->Play(row_, col_);
-    }
-   protected:
-    void Inc() {
-      if (othello_ == nullptr) return;
-      ++col_;
-      if (col_ == 8) {
-        col_ = 0;
-        ++row_;
-        if (row_ == 8) othello_ = nullptr;
+      // Can be replaced by `__builtin_ffs` in GCC
+      assert(moves_);
+      auto index = 0;
+      std::uint64_t mask = 1;
+      while ((moves_ & mask) == 0) {
+        ++index;
+        mask <<= 1;
       }
+      return othello_->Play(index / 8, index % 8);
     }
    private:
     const OthelloBoard* othello_;
-    int row_ = 0;
-    int col_ = -1;
+    std::uint64_t moves_;
   };
   Iterator begin() const { return Iterator(this); }
-  Iterator end() const { return Iterator(); }
+  Iterator end() const { return Iterator(this, 0); }
 
  protected:
   bool IsInside(int row, int col) const;
-  bool CanFlip(int row, int col, int delta_row, int delta_col) const;
-  char Square(int row, int col) const;
+  Player Get(int row, int col) const;
+  void Set(int row, int col, Player player);
+  std::uint64_t Shift(std::uint64_t board, int dir) const;
+  void GenerateMoves();
+  char Repr(int row, int col) const;
 
  private:
-  Player board_[8][8];
+  std::uint64_t board_[2];
+  std::uint64_t moves_;
   Player self_;
   Player oppo_;
   int last_row_ = -1;
