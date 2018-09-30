@@ -108,6 +108,8 @@ OthelloBoard OthelloBoard::Pass() const {
   auto new_board = OthelloBoard(*this);
   new_board.self_ = oppo_;
   new_board.oppo_ = self_;
+  new_board.last_row_ = -1;
+  new_board.last_col_ = -1;
   return new_board;
 }
 
@@ -172,11 +174,11 @@ int OthelloBoard::Negamax(int depth, int alpha, int beta) const {
   auto best = -kMaxInt;
   auto can_play = false;
   for (auto child : *this) {
+    can_play = true;
     auto score = -child.Negamax(depth - 1, -beta, -alpha);
     best = max(best, score);
     alpha = max(alpha, score);
     if (alpha >= beta) break;
-    can_play = true;
   }
   if (!can_play) return -Pass().Negamax(depth - 1, -beta, -alpha);
   return best;
